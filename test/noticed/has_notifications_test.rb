@@ -44,4 +44,12 @@ class HasNotificationsTest < ActiveSupport::TestCase
       user.destroy
     end
   end
+
+  test "deletes notifications with matching param when TextCoder is used" do
+    JsonTextCoderNotification.create!(recipient: user, type: "Example", params: {text_user: user})
+
+    assert_difference "JsonTextCoderNotification.count", -1 do
+      user.destroy
+    end
+  end
 end
