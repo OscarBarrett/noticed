@@ -21,7 +21,11 @@ module Noticed
           when "postgresql", "postgis"
             model.where("params @> ?", Noticed::Coder.dump(param_name.to_sym => self).to_json)
           when "mysql2"
-            model.where("JSON_CONTAINS(params, ?)", Noticed::Coder.dump(param_name.to_sym => self).to_json)
+            if model.noticed_coder == Noticed::Coder
+              model.where("JSON_CONTAINS(params, ?)", Noticed::Coder.dump(param_name.to_sym => self).to_json)
+            else
+              model.where("JSON_CONTAINS(JSON_UNQUOTE(params), JSON_UNQUOTE(?))", Noticed::Coder.dump(param_name.to_sym => self).to_json)
+            end
           when "sqlite3"
             model.where("json_extract(params, ?) = ?", "$.#{param_name}", Noticed::Coder.dump(self).to_json)
           else
